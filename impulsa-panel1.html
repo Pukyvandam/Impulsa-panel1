@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IMPULSA by Promora — Panel de gestión</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f6f3; --surface: #ffffff; --surface2: #f0ede8;
+    --border: #e2ddd6; --border2: #cec8be;
+    --text: #1a1814; --text2: #6b6560; --text3: #a09a93;
+    --gold: #c9a84c; --gold-light: #f5edda;
+    --success-bg: #eaf4ed; --success: #2d7a47;
+    --danger-bg: #fdf0ef; --danger: #c0392b;
+    --radius: 10px; --radius-lg: 14px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 780px; margin: 0 auto; }
+  header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: 26px; font-weight: 400; letter-spacing: -0.3px; }
+  header span { font-size: 13px; color: var(--text3); font-weight: 300; }
+  .tabs { display: flex; gap: 2px; background: var(--surface2); border-radius: var(--radius); padding: 4px; margin-bottom: 2rem; width: fit-content; }
+  .tab { padding: 8px 20px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; background: none; border: none; cursor: pointer; color: var(--text2); border-radius: 7px; transition: all 0.15s; }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 12px; font-weight: 500; color: var(--text2); }
+  input[type="text"], input[type="email"], input[type="date"], input[type="url"] {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 9px 12px; width: 100%; outline: none; transition: border-color 0.15s;
+  }
+  input:focus { border-color: var(--border2); background: #fff; }
+  input[readonly] { opacity: 0.5; cursor: default; }
+  .drive-personal-wrap { margin-bottom: 1rem; }
+  .drive-personal-label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .badge-drive { font-size: 10px; font-weight: 500; background: var(--gold-light); color: #7a5e1a; padding: 2px 8px; border-radius: 20px; }
+  .drives-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-top: 10px; }
+  .drive-input-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .drive-input-wrap label { font-size: 11px; color: var(--text3); }
+  .drive-input-wrap input { font-size: 12px; padding: 7px 10px; }
+  .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+  .btn-primary { width: 100%; padding: 12px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; background: var(--text); color: #fff; border: none; border-radius: var(--radius); margin-top: 1.25rem; transition: opacity 0.15s; }
+  .btn-primary:hover { opacity: 0.85; }
+  .impulsado-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 12px; transition: box-shadow 0.15s; }
+  .impulsado-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .card-name { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--gold-light); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #7a5e1a; flex-shrink: 0; font-family: 'DM Serif Display', serif; }
+  .name-text { font-size: 15px; font-weight: 500; }
+  .email-text { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .badge { font-size: 11px; padding: 4px 12px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+  .badge-progress { background: var(--surface2); color: var(--text2); }
+  .badge-done { background: var(--success-bg); color: var(--success); }
+  .progress-bar { height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; margin-bottom: 14px; }
+  .progress-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s ease; }
+  .weeks-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; }
+  .week-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); color: var(--text3); background: var(--bg); transition: all 0.12s; user-select: none; }
+  .week-dot:hover { border-color: var(--border2); color: var(--text2); }
+  .week-dot.sent { background: var(--success-bg); color: var(--success); border-color: transparent; }
+  .week-dot.current { background: var(--text); color: #fff; border-color: transparent; }
+  .card-meta { font-size: 11px; color: var(--text3); margin-bottom: 12px; display: flex; gap: 16px; }
+  .card-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .btn-sm { padding: 7px 14px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border-radius: var(--radius); transition: all 0.12s; white-space: nowrap; }
+  .btn-send { background: var(--text); color: #fff; border: none; }
+  .btn-send:hover { opacity: 0.85; }
+  .btn-outline { background: none; border: 1px solid var(--border2); color: var(--text2); }
+  .btn-outline:hover { background: var(--surface2); color: var(--text); }
+  .btn-danger { background: none; border: 1px solid #e8c5c2; color: var(--danger); }
+  .btn-danger:hover { background: var(--danger-bg); }
+  .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text3); font-size: 14px; line-height: 1.8; }
+  .empty-state strong { display: block; font-family: 'DM Serif Display', serif; font-size: 18px; font-weight: 400; color: var(--text2); margin-bottom: 6px; }
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text); color: #fff; padding: 10px 22px; border-radius: 30px; font-size: 13px; font-weight: 500; opacity: 0; transition: all 0.25s; pointer-events: none; z-index: 99; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .reminder-banner { background: var(--gold-light); border: 1px solid #e8d49a; border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+  .reminder-banner-title { font-size: 12px; font-weight: 500; color: #7a5e1a; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .reminder-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); display: inline-block; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .reminder-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid #e8d49a; font-size: 14px; }
+  .reminder-item:first-of-type { border-top: none; padding-top: 0; }
+  .reminder-semana { font-size: 11px; color: #7a5e1a; font-weight: 500; background: #eedfa0; padding: 2px 8px; border-radius: 20px; }
+  @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } .drives-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>IMPULSA by Promora</h1>
+    <span>Panel de gestión de impulsados</span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-btn-nuevo" onclick="showTab('nuevo')">Nuevo impulsado</button>
+    <button class="tab" id="tab-btn-activos" onclick="showTab('activos')">Impulsados activos</button>
+  </div>
+
+  <div id="tab-nuevo" class="tab-content active">
+    <div class="form-card">
+      <p class="section-label">Datos del impulsado</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" id="inp-nombre" placeholder="Ej: Carlos García" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="inp-email" placeholder="carlos@email.com" />
+        </div>
+        <div class="form-group">
+          <label>Fecha del primer entregable</label>
+          <input type="date" id="inp-fecha" />
+        </div>
+        <div class="form-group">
+          <label>Día de envío semanal</label>
+          <input type="text" id="inp-dia" readonly placeholder="Se calcula automáticamente" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <p class="section-label">Drive personal — email de bienvenida</p>
+      <div class="drive-personal-wrap">
+        <div class="drive-personal-label">
+          <label style="margin:0;">Link al Drive personal del impulsado</label>
+          <span class="badge-drive">Bienvenida</span>
+        </div>
+        <input type="url" id="drive-personal" placeholder="https://drive.google.com/drive/folders/..." />
+      </div>
+      <div class="divider"></div>
+      <p class="section-label">Carpetas semanales — 13 entregables</p>
+      <div class="drives-grid" id="drives-grid"></div>
+    </div>
+
+    <button class="btn-primary" id="btn-registrar" onclick="window._addImpulsado()">Registrar impulsado</button>
+  </div>
+
+  <div id="tab-activos" class="tab-content">
+    <div id="recordatorios"></div>
+    <div id="impulsados-list"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── Firebase setup ────────────────────────────────────────
+const app = initializeApp({
+  apiKey: "AIzaSyAhkwA5GPTH-H5Z2jB5m3ZElIgHQ70ob7Q",
+  authDomain: "panel-de-gestion-46573.firebaseapp.com",
+  projectId: "panel-de-gestion-46573",
+  storageBucket: "panel-de-gestion-46573.firebasestorage.app",
+  messagingSenderId: "958270195175",
+  appId: "1:958270195175:web:f0b41905e395f9af53e942"
+});
+const db  = getFirestore(app);
+const COL = collection(db, 'impulsados');
+
+// ── EmailJS setup ─────────────────────────────────────────
+const EJS_KEY  = 'Su2zLnriP0HOZ7FRE';
+const EJS_SVC  = 'service_jlz6mwp';
+const EJS_BV   = 'template_942xvms';
+const EJS_ENT  = 'template_mmgy0uo';
+
+async function sendEmail(templateId, params) {
+  const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ service_id: EJS_SVC, template_id: templateId, user_id: EJS_KEY, template_params: params })
+  });
+  if (!res.ok) throw new Error('EmailJS error');
+}
+
+// ── DB helpers ────────────────────────────────────────────
+async function load() {
+  try {
+    const snap = await getDocs(query(COL, orderBy('id')));
+    return snap.docs.map(d => ({ _fid: d.id, ...d.data() }));
+  } catch(e) { console.error(e); return []; }
+}
+async function saveNew(imp)       { await addDoc(COL, imp); }
+async function saveUpdate(fid, f) { await updateDoc(doc(db,'impulsados',fid), f); }
+async function delRecord(fid)     { await deleteDoc(doc(db,'impulsados',fid)); }
+
+// ── UI helpers ────────────────────────────────────────────
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+function toast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = err ? '#c0392b' : '#1a1814';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function setBtn(btn, loading) {
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.style.opacity = loading ? '0.6' : '1';
+}
+
+function buildDrivesGrid() {
+  const grid = document.getElementById('drives-grid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= 13; i++) {
+    const w = document.createElement('div');
+    w.className = 'drive-input-wrap';
+    w.innerHTML = `<label>Semana ${i}</label><input type="url" id="drive-${i}" placeholder="https://drive.google.com/..." />`;
+    grid.appendChild(w);
+  }
+}
+
+document.getElementById('inp-fecha').addEventListener('change', function() {
+  if (!this.value) return;
+  document.getElementById('inp-dia').value = DIAS[new Date(this.value+'T12:00:00').getDay()];
+});
+
+// ── showTab ───────────────────────────────────────────────
+function showTab(name) {
+  ['nuevo','activos'].forEach(n => {
+    document.getElementById(`tab-${n}`).classList.toggle('active', n===name);
+    document.getElementById(`tab-btn-${n}`).classList.toggle('active', n===name);
+  });
+  if (name === 'activos') renderActivos();
+}
+window.showTab = showTab;
+
+// ── Añadir impulsado ──────────────────────────────────────
+async function addImpulsado() {
+  const nombre        = document.getElementById('inp-nombre').value.trim();
+  const email         = document.getElementById('inp-email').value.trim();
+  const fecha         = document.getElementById('inp-fecha').value;
+  const drivePersonal = document.getElementById('drive-personal').value.trim();
+  if (!nombre || !email || !fecha) { toast('Completa nombre, email y fecha', true); return; }
+
+  const btn = document.getElementById('btn-registrar');
+  setBtn(btn, true); btn.textContent = 'Guardando...';
+
+  const drives = Array.from({length:13}, (_,i) => document.getElementById(`drive-${i+1}`).value.trim()||'');
+  try {
+    await saveNew({ id: Date.now(), nombre, email, fecha, drivePersonal, drives, enviadas: [], bienvenidaEnviada: false });
+    ['inp-nombre','inp-email','inp-fecha','inp-dia','drive-personal'].forEach(id => document.getElementById(id).value='');
+    buildDrivesGrid();
+    toast(`${nombre} registrado ✓`);
+    showTab('activos');
+  } catch(e) {
+    toast('Error al guardar', true);
+  }
+  btn.textContent = 'Registrar impulsado';
+  setBtn(btn, false);
+}
+window._addImpulsado = addImpulsado;
+
+// ── Recordatorios ─────────────────────────────────────────
+async function renderRecordatorios() {
+  const data = await load();
+  const container = document.getElementById('recordatorios');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const pendientes = [];
+  data.forEach(imp => {
+    for (let s=1; s<=13; s++) {
+      if ((imp.enviadas||[]).includes(s)) continue;
+      const fd = new Date(imp.fecha+'T12:00:00');
+      fd.setDate(fd.getDate()+(s-1)*7); fd.setHours(0,0,0,0);
+      if (fd.getTime()===today.getTime()) pendientes.push({imp,semana:s});
+    }
+  });
+  if (!pendientes.length) { container.innerHTML=''; return; }
+  container.innerHTML = `
+    <div class="reminder-banner">
+      <div class="reminder-banner-title"><span class="reminder-dot"></span>Entregables pendientes hoy</div>
+      ${pendientes.map(({imp,semana}) => `
+        <div class="reminder-item">
+          <span>${imp.nombre}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="reminder-semana">Semana ${semana}</span>
+            <button class="btn-sm btn-send" onclick="window._sendSemana('${imp._fid}',${semana})">Enviar →</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── Render activos ────────────────────────────────────────
+async function renderActivos() {
+  await renderRecordatorios();
+  const container = document.getElementById('impulsados-list');
+  container.innerHTML = `<div class="empty-state" style="font-size:13px;color:#a09a93;">Cargando...</div>`;
+  const data = await load();
+  if (!data.length) {
+    container.innerHTML = `<div class="empty-state"><strong>Sin impulsados activos</strong>Añade uno desde la pestaña anterior.</div>`;
+    return;
+  }
+  container.innerHTML = '';
+  const today = new Date();
+  data.forEach(imp => {
+    const enviadas = imp.enviadas||[];
+    const sent = enviadas.length;
+    const pct  = Math.round((sent/13)*100);
+    const initials = imp.nombre.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const weeksHTML = Array.from({length:13},(_,i)=>{
+      const s=i+1;
+      const fd=new Date(imp.fecha+'T12:00:00'); fd.setDate(fd.getDate()+(s-1)*7);
+      const isSent=enviadas.includes(s);
+      const cls=isSent?'sent':(!isSent&&fd<=today?'current':'');
+      return `<div class="week-dot ${cls}" title="Semana ${s} — ${fd.toLocaleDateString('es-ES',{day:'numeric',month:'short'})}${isSent?' (enviada)':''}" onclick="window._toggleWeek('${imp._fid}',${s})">${s}</div>`;
+    }).join('');
+    const next = Array.from({length:13},(_,i)=>i+1).find(s=>!enviadas.includes(s));
+    const startDate = new Date(imp.fecha+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+    const card = document.createElement('div');
+    card.className = 'impulsado-card';
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-name">
+          <div class="avatar">${initials}</div>
+          <div>
+            <div class="name-text">${imp.nombre}</div>
+            <div class="email-text">${imp.email}</div>
+          </div>
+        </div>
+        <span class="badge ${sent===13?'badge-done':'badge-progress'}">${sent===13?'Completado':`${sent} / 13 enviadas`}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="card-meta"><span>Inicio: ${startDate}</span><span>${13-sent} semanas restantes</span></div>
+      <div class="weeks-row">${weeksHTML}</div>
+      <div class="card-actions">
+        <button class="btn-sm btn-outline" id="btn-bv-${imp._fid}" onclick="window._sendBienvenida('${imp._fid}')">
+          ${imp.bienvenidaEnviada?'Reenviar bienvenida':'Enviar bienvenida'}
+        </button>
+        ${next
+          ? `<button class="btn-sm btn-send" id="btn-sem-${imp._fid}" onclick="window._sendSemana('${imp._fid}',${next})">Enviar semana ${next} →</button>`
+          : `<span style="font-size:12px;color:#2d7a47;font-weight:500;">Programa completado ✓</span>`}
+        <button class="btn-sm btn-danger" id="btn-del-${imp._fid}" onclick="window._confirmDelete('${imp._fid}')">Eliminar</button>
+        <span id="confirm-${imp._fid}" style="display:none;align-items:center;gap:6px;font-size:12px;">
+          ¿Segura?
+          <button class="btn-sm btn-danger" onclick="window._removeImpulsado('${imp._fid}')">Sí, eliminar</button>
+          <button class="btn-sm btn-outline" onclick="window._cancelDelete('${imp._fid}')">Cancelar</button>
+        </span>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+// ── Acciones ──────────────────────────────────────────────
+async function sendBienvenida(fid) {
+  const data = await load();
+  const imp  = data.find(i=>i._fid===fid);
+  if (!imp) return;
+  const btn = document.getElementById(`btn-bv-${fid}`);
+  setBtn(btn,true); btn.textContent='Enviando...';
+  try {
+    await sendEmail(EJS_BV, { to_email:imp.email, nombre:imp.nombre, drive_personal:imp.drivePersonal||'[Acceso al Drive IMPULSA]' });
+    await saveUpdate(fid,{bienvenidaEnviada:true});
+    toast(`Bienvenida enviada a ${imp.nombre} ✓`);
+    renderActivos();
+  } catch(e) {
+    toast('Error al enviar', true);
+    btn.textContent = imp.bienvenidaEnviada?'Reenviar bienvenida':'Enviar bienvenida';
+    setBtn(btn,false);
+  }
+}
+
+async function sendSemana(fid, semana) {
+  const data = await load();
+  const imp  = data.find(i=>i._fid===fid);
+  if (!imp) return;
+  const btn = document.getElementById(`btn-sem-${fid}`);
+  setBtn(btn,true); if(btn) btn.textContent='Enviando...';
+  try {
+    await sendEmail(EJS_ENT, { to_email:imp.email, nombre:imp.nombre, semana, link:imp.drives[semana-1]||'[link no configurado]' });
+    const enviadas=[...(imp.enviadas||[])];
+    if(!enviadas.includes(semana)) enviadas.push(semana);
+    await saveUpdate(fid,{enviadas});
+    toast(`Semana ${semana} enviada a ${imp.nombre} ✓`);
+    renderActivos();
+  } catch(e) {
+    toast('Error al enviar', true);
+    if(btn){btn.textContent=`Enviar semana ${semana} →`;setBtn(btn,false);}
+  }
+}
+
+async function toggleWeek(fid, semana) {
+  const data = await load();
+  const imp  = data.find(i=>i._fid===fid);
+  if (!imp) return;
+  const enviadas=[...(imp.enviadas||[])];
+  const idx=enviadas.indexOf(semana);
+  if(idx>=0) enviadas.splice(idx,1); else enviadas.push(semana);
+  await saveUpdate(fid,{enviadas});
+  renderActivos();
+}
+
+function confirmDelete(fid) {
+  document.getElementById(`btn-del-${fid}`).style.display='none';
+  document.getElementById(`confirm-${fid}`).style.display='flex';
+}
+function cancelDelete(fid) {
+  document.getElementById(`btn-del-${fid}`).style.display='';
+  document.getElementById(`confirm-${fid}`).style.display='none';
+}
+async function removeImpulsado(fid) {
+  await delRecord(fid);
+  renderActivos();
+  toast('Impulsado eliminado');
+}
+
+// Exponer funciones al HTML
+window._sendBienvenida = sendBienvenida;
+window._sendSemana     = sendSemana;
+window._toggleWeek     = toggleWeek;
+window._confirmDelete  = confirmDelete;
+window._cancelDelete   = cancelDelete;
+window._removeImpulsado = removeImpulsado;
+
+// Init
+buildDrivesGrid();
+</script>
+</body>
+</html>
